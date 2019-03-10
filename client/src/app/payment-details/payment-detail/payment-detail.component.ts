@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PaymentDetailService } from 'src/app/shared/payment-detail.service';
 import { NgForm } from '@angular/forms';
-import { formArrayNameProvider } from '@angular/forms/src/directives/reactive_directives/form_group_name';
-import { ConsoleReporter } from 'jasmine';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-payment-detail',
@@ -11,7 +10,8 @@ import { ConsoleReporter } from 'jasmine';
 })
 export class PaymentDetailComponent implements OnInit {
 
-  constructor(private service: PaymentDetailService) { }
+  constructor(public service: PaymentDetailService,
+              private toastr: ToastrService) { }
 
   ngOnInit() {
     this.resetForm();
@@ -31,8 +31,37 @@ export class PaymentDetailComponent implements OnInit {
     };
   }
 
-  submit(form: NgForm): void {
-    // form.value
-    console.log(form.value);
+  onSubmit(form: NgForm): void {
+    if (this.service.formData.Id === 0) {
+      this.insert(form);
+    } else {
+      this.update(form);
+    }
+  }
+
+  private insert(form: NgForm) {
+    this.service.post().subscribe(
+      res => {
+        this.resetForm(form);
+        this.toastr.success('Submitted successfully', 'Payment Detail Register');
+
+        this.service.getAll();
+      },
+      err => {
+        console.log(err);
+      });
+  }
+
+  private update(form: NgForm) {
+    this.service.put().subscribe(
+      res => {
+        this.resetForm(form);
+        this.toastr.info('Updated successfully', 'Payment Detail Register');
+
+        this.service.getAll();
+      },
+      err => {
+        console.log(err);
+      });
   }
 }

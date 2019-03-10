@@ -1,4 +1,7 @@
+import { PaymentDetail } from './../../shared/payment-detail.model';
+import { PaymentDetailService } from './../../shared/payment-detail.service';
 import { Component, OnInit } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-payment-detail-list',
@@ -7,9 +10,27 @@ import { Component, OnInit } from '@angular/core';
 })
 export class PaymentDetailListComponent implements OnInit {
 
-  constructor() { }
+  constructor(public service:  PaymentDetailService,
+              private toastr: ToastrService) { }
 
   ngOnInit() {
+    this.service.getAll();
   }
 
+  populateForm(paymentDetail: PaymentDetail) {
+    this.service.formData = Object.assign({}, paymentDetail);
+  }
+
+  delete(id: number) {
+    if (confirm('Are you sure to delete this record?')) {
+      this.service.delete(id).subscribe(
+        res => {
+          this.toastr.warning('Deleted successfully', 'Payment Detail Register');
+          this.service.getAll();
+        },
+        err => {
+          console.log(err);
+        });
+    }
+  }
 }
